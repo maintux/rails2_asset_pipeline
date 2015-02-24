@@ -5,7 +5,15 @@ module Rails2AssetPipeline
   STATIC_ENVIRONMENTS = ["production", "staging"]
 
   class << self
-    attr_accessor :dynamic_assets_available, :manifest, :prefix
+    attr_accessor :dynamic_assets_available, :manifest, :prefix, :static_environments
+  end
+
+  def self.static_environments
+    @static_environments || STATIC_ENVIRONMENTS
+  end
+
+  def self.with_static_environments(environments)
+    @static_environments = environments
   end
 
   def self.env
@@ -23,7 +31,7 @@ module Rails2AssetPipeline
   end
 
   def self.config_ru(rack)
-    unless STATIC_ENVIRONMENTS.include?(Rails.env)
+    unless Rails2AssetPipeline.static_environments.include?(Rails.env)
       prefix = Rails2AssetPipeline.prefix
 
       Rails2AssetPipeline.dynamic_assets_available = true
@@ -37,7 +45,7 @@ module Rails2AssetPipeline
   end
 
   def self.static?
-    not Rails2AssetPipeline.dynamic_assets_available or Rails2AssetPipeline::STATIC_ENVIRONMENTS.include?(Rails.env)
+    not Rails2AssetPipeline.dynamic_assets_available or Rails2AssetPipeline.static_environments.include?(Rails.env)
   end
 
   def self.with_dynamic_assets_available(value)
